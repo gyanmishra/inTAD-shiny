@@ -8,7 +8,7 @@ ui<-shinyUI(fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      p('Prepare 3 input files:'),
+      h5('Prepare 3 input files:'),
       p('1. H3K27ac ChIP-seq RPKM normalized signals within peaks'),
       p('Example: ', a(href = 'https://raw.githubusercontent.com/venuthatikonda/inTAD-shiny/master/chipSignal.txt', 'ChIP_Signal.txt')),
       p('2. H3K27ac ChIP-seq peaks in bed format'),
@@ -48,11 +48,14 @@ ui<-shinyUI(fluidPage(
                 )
       ),
       
-      actionButton('analyse', 'Perform analysis')
+      actionButton('analyse', 'Perform analysis'),
+      h5('Download results'),
+      p('1. Download unfiltered data'),
+      downloadButton('downloadData', 'Download')
       
     ),
     mainPanel(
-      h4('Top ranked Enhancer-Gene correlations'),
+      h2('Top ranked Enhancer-Gene correlations'),
       withSpinner(dataTableOutput('corResults'))
       # h4('Few lines from ChIP-seq Bed file'),
       # dataTableOutput('chipBedLines'),
@@ -112,10 +115,14 @@ server<-shinyServer(function(input, output){
   output$corResults=renderDataTable( 
     
     intadCor()
-    
-    
-  )
   
+  )
+  output$downloadData=downloadHandler(
+    filename = function(){"inTAD_results.txt"},
+    content = function(file){
+      write.table(intadCor(), file, sep="\t", quote=FALSE, row.names = FALSE)
+    }
+  )
 })
 
 ### RUN
